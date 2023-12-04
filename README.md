@@ -1,6 +1,6 @@
 # STM32_CAN
 
-MCU build target: STM32F103C6T8
+MCU build target: STM32F103C8T6
 
 Features:
 - Loop back CAN
