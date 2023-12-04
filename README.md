@@ -2,7 +2,7 @@
 
 MCU build target: STM32F103C6T8
 
-Folders:
+
 - Loop back CAN
 - CAN communication between 2 devices
 
