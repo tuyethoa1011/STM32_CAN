@@ -57,7 +57,6 @@ uint8_t RxData[8];
 
 uint8_t Tx_Buffer[55];
 uint8_t flag_RcvBack = 0;
-uint8_t flag_Transmit = 0;
 
 /* USER CODE END PV */
 
@@ -117,8 +116,6 @@ int main(void)
   MX_CAN_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_CAN_MspInit(&hcan);
-
   HAL_CAN_Init(&hcan);
 
   //Send notify signal to recieve message from actuator node
@@ -155,29 +152,34 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  HAL_Delay(1000);
-	  //support maximum 3 mailbox
 
-	  if(flag_RcvBack == 1 && flag_Transmit == 1)
+	  if(flag_RcvBack == 1) //recieve case
 	  {
-			//print oled debugger
+		  	//print oled debugger
 		  	memset(Tx_Buffer,0,sizeof(Tx_Buffer)); //clear buffer before write
-			sprintf((char*)Tx_Buffer,"\nSENSOR NODE\nTxID:%lu\nTx:%s\nRxID:%lu\nRx:%s",TxHeader.StdId,TxData,RxHeader.StdId,RxData);
-			HAL_UART_Transmit(&huart1,Tx_Buffer,sizeof(Tx_Buffer), 10);
+		  	sprintf((char*)Tx_Buffer,"\nSENSOR NODE\nTxID:%lu\nTx:%s\nRxID:%lu\nRx:%s",TxHeader.StdId,TxData,RxHeader.StdId,RxData);
+		  	HAL_UART_Transmit(&huart1,Tx_Buffer,sizeof(Tx_Buffer), 10);
 
-			flag_RcvBack = 0;
-			flag_Transmit = 0;
-	  }
+		  	//turn on led
+		  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, flag_RcvBack);
 
-	  if (flag_Transmit == 0){
+		  	flag_RcvBack = 0; //reset flag
+
+	  } else if(flag_RcvBack == 0) //transmit case
+	  {
 		  if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
 		  {
 			  Error_Handler();
 		  } else //Transmit oke
 		  {
-			  flag_Transmit = 1;
+			  //truyen duoc thi den tat
+			  //turn off led
+			  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, flag_RcvBack);
 		  }
 	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
