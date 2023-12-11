@@ -56,10 +56,7 @@ uint8_t TxData[8] = "Bye bye!";
 uint8_t RxData[8];
 
 uint8_t Tx_Buffer[58];
-uint8_t free_mail;
-uint8_t Txpending_message = 0;
 
-uint8_t count = 0;
 uint8_t data_catch = 0;
 /* USER CODE END PV */
 
@@ -83,9 +80,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	}
 	else
 	{
-
 		data_catch = 1;
-		//count++;
 	}
 }
 /* USER CODE END 0 */
@@ -121,7 +116,6 @@ int main(void)
   MX_CAN_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_CAN_MspInit(&hcan);
 
   HAL_CAN_Init(&hcan);
 
@@ -168,14 +162,24 @@ int main(void)
 		  sprintf((char*)Tx_Buffer,"\nACTUATOR NODE\nTxID:%lu\nTx:%s\nRxID:%lu\nRx:%s",TxHeader.StdId,TxData,RxHeader.StdId,RxData);
 		  HAL_UART_Transmit(&huart1,Tx_Buffer,sizeof(Tx_Buffer), 10);
 
+		  //turn on led
+		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3,GPIO_PIN_SET);
+
+		  HAL_Delay(500); //delay 500ms before sending back
+
 		  if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
 		  {
 			  Error_Handler();
 		  } else //Transmit oke
 		  {
-		 		  //do nothing
+			  //turn on led
+			   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3,GPIO_PIN_RESET);
 		  }
+
 		  data_catch = 0;
+	  } else if(data_catch == 0)
+	  {
+		  //do nothing
 	  }
 
     /* USER CODE END WHILE */
